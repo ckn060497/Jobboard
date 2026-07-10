@@ -1,6 +1,6 @@
 # Foundry — MERN Job Board
 
-https://ckn060497.github.io/jobboard/frontend/
+https://ckn060497.github.io/Jobboard/frontend/
 
 A full-stack job board built with MongoDB, Express, React, and Node.js.
 Three roles are supported: **Job Seeker**, **Employer**, and **Admin**.
