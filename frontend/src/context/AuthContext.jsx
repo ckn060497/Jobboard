@@ -1,0 +1,64 @@
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import api from "../api/axios.js";
+
+const AuthContext = createContext(null);
+
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const loadUser = useCallback(async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+    try {
+      const { data } = await api.get("/auth/me");
+      setUser(data.user);
+    } catch {
+      localStorage.removeItem("token");
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadUser();
+  }, [loadUser]);
+
+  const login = async (email, password) => {
+    const { data } = await api.post("/auth/login", { email, password });
+    localStorage.setItem("token", data.token);
+    setUser(data.user);
+    return data.user;
+  };
+
+  const register = async (payload) => {
+    const { data } = await api.post("/auth/register", payload);
+    localStorage.setItem("token", data.token);
+    setUser(data.user);
+    return data.user;
+  };
+
+  const loginWithToken = async (token) => {
+    localStorage.setItem("token", token);
+    const { data } = await api.get("/auth/me");
+    setUser(data.user);
+    return data.user;
+  };
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, setUser, loading, login, register, logout, loginWithToken }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => useContext(AuthContext);
